@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b2d5c">
+<title>NEET Study Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Pacifico&display=swap');
+
+:root{
+  --navy:#0b2d5c; --blue:#1769aa; --ink:#172033; --muted:#64748b;
+  --line:#dbe4ee; --bg:#f5f8fc; --card:#ffffff;
+  --physics:#dff2ff; --chem:#e5f7ee; --bio:#fff1d6;
+  --green:#198754; --orange:#f59e0b; --red:#ef4444;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}
+header{
+  background:linear-gradient(135deg,#08244b,#124a84);
+  color:white;padding:34px 20px 28px;text-align:center;
+}
+header h1{margin:0;font-size:clamp(34px,6vw,64px);font-weight:800;letter-spacing:2px}
+header h1 span{color:#9bd7ff}
+header p{margin:9px 0 0;opacity:.9;font-size:15px;letter-spacing:2px}
+.container{max-width:1250px;margin:0 auto;padding:22px}
+.summary{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px
+}
+.stat,.subject-card,.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 7px 24px #17324d0b}
+.stat{padding:18px}
+.stat .label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+.stat .value{font-size:30px;font-weight:800;margin-top:5px}
+.progress{height:9px;background:#e8eef5;border-radius:99px;overflow:hidden;margin-top:10px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#1769aa,#38a3ff);border-radius:99px;transition:.3s}
+.subjects{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.subject-card{padding:20px;position:relative;overflow:hidden}
+.subject-card.physics{background:linear-gradient(145deg,#fff,var(--physics))}
+.subject-card.chem{background:linear-gradient(145deg,#fff,var(--chem))}
+.subject-card.bio{background:linear-gradient(145deg,#fff,var(--bio))}
+.subject-card h2{margin:0 0 3px;font-size:21px}
+.subject-card p{margin:0;color:var(--muted);font-size:12px}
+.subject-percent{font-size:34px;font-weight:800;margin-top:12px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}
+select,input,button{
+  border:1px solid var(--line);background:white;color:var(--ink);
+  border-radius:10px;padding:11px 13px;font:inherit
+}
+input{min-width:240px;flex:1}
+button{cursor:pointer;font-weight:700}
+button.primary{background:var(--navy);color:white;border-color:var(--navy)}
+button.danger{color:#b91c1c}
+.panel{overflow:hidden}
+.panel-head{
+  padding:18px 20px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:12px
+}
+.panel-head h2{margin:0;font-size:20px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:850px}
+th,td{padding:12px 10px;border-bottom:1px solid #e7edf3;text-align:center}
+th:first-child,td:first-child{text-align:left}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:#475569;background:#f8fafc}
+td:first-child{font-weight:600}
+tr:hover td{background:#fbfdff}
+.chapter-no{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:8px;background:var(--navy);color:white;font-size:12px;margin-right:8px}
+.tag{font-size:10px;color:#64748b;font-weight:600}
+.check{
+  width:21px;height:21px;appearance:none;border:1.7px solid #a9b7c8;
+  border-radius:5px;background:white;cursor:pointer;display:inline-grid;place-items:center
+}
+.check:checked{background:#198754;border-color:#198754}
+.check:checked:after{content:"✓";color:white;font-size:14px;font-weight:800}
+.complete{color:#198754}
+.inprogress{color:#f59e0b}
+.footer{text-align:center;padding:30px;color:#64748b;font-size:12px}
+.hand{font-family:Pacifico,cursive;font-size:22px;color:#0b2d5c}
+@media(max-width:900px){
+ .summary{grid-template-columns:repeat(2,1fr)}
+ .subjects{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+ .container{padding:12px}.summary{grid-template-columns:1fr 1fr}
+ .stat .value{font-size:24px}header{padding:25px 14px}
+ input{min-width:150px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hand">Plan → Prepare → Practice → Perform</div>
+  <h1>NEET <span>STUDY TRACKER</span></h1>
+  <p>PHYSICS • CHEMISTRY • BIOLOGY | YOUR PROGRESS, SAVED AUTOMATICALLY</p>
+</header>
+
+<main class="container">
+  <section class="summary">
+    <div class="stat"><div class="label">Overall Progress</div><div class="value" id="overall">0%</div><div class="progress"><i id="overallBar"></i></div></div>
+    <div class="stat"><div class="label">Chapters / Units Done</div><div class="value" id="doneCount">0 / 0</div></div>
+    <div class="stat"><div class="label">Tasks Completed</div><div class="value" id="taskCount">0 / 0</div></div>
+    <div class="stat"><div class="label">Current Status</div><div class="value" id="status">START</div></div>
+  </section>
+
+  <section class="subjects">
+    <div class="subject-card physics"><h2>⚡ Physics</h2><p>Mechanics • E&M • Optics • Modern Physics</p><div class="subject-percent" id="physicsPct">0%</div><div class="progress"><i id="physicsBar"></i></div></div>
+    <div class="subject-card chem"><h2>🧪 Chemistry</h2><p>Physical • Inorganic • Organic</p><div class="subject-percent" id="chemPct">0%</div><div class="progress"><i id="chemBar"></i></div></div>
+    <div class="subject-card bio"><h2>🧬 Biology</h2><p>Botany • Zoology • Genetics • Ecology</p><div class="subject-percent" id="bioPct">0%</div><div class="progress"><i id="bioBar"></i></div></div>
+  </section>
+
+  <div class="controls">
+    <input id="search" placeholder="Search chapter / unit...">
+    <select id="subjectFilter"><option value="all">All Subjects</option><option value="Physics">Physics</option><option value="Chemistry">Chemistry</option><option value="Biology">Biology</option></select>
+    <select id="classFilter"><option value="all">All Classes</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
+    <button class="primary" id="markAll">Mark visible complete</button>
+    <button id="clearAll">Clear visible</button>
+    <button class="danger" id="reset">Reset everything</button>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Syllabus Tracker</h2>
+      <span class="tag">Tick each stage as you finish it</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Chapter / Unit</th><th>Lectures</th><th>Short Notes</th><th>NCERT / Formulae</th><th>PYQs</th><th>MCQs</th><th>Progress</th></tr></thead>
+        <tbody id="tracker"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="footer">Progress is stored only in this browser using localStorage. <br><b>NEET UG 2026 syllabus structure used as the subject reference.</b></div>
+</main>
+
+<script>
+const syllabus = {
+Physics: [
+["11","Physics and Measurement"],["11","Kinematics"],["11","Laws of Motion"],["11","Work, Energy and Power"],
+["11","Rotational Motion"],["11","Gravitation"],["11","Properties of Solids and Liquids"],["11","Thermodynamics"],
+["11","Kinetic Theory of Gases"],["11","Oscillations and Waves"],
+["12","Electrostatics"],["12","Current Electricity"],["12","Magnetic Effects of Current and Magnetism"],
+["12","Electromagnetic Induction and Alternating Currents"],["12","Electromagnetic Waves"],
+["12","Optics"],["12","Dual Nature of Matter and Radiation"],["12","Atoms and Nuclei"],
+["12","Electronic Devices"],["12","Experimental Skills"]
+],
+Chemistry: [
+["11","Some Basic Concepts of Chemistry"],["11","Atomic Structure"],["11","Classification of Elements and Periodicity"],["11","Chemical Bonding and Molecular Structure"],
+["11","Thermodynamics"],["11","Equilibrium"],["11","Redox Reactions"],["11","Organic Chemistry – Basic Principles and Techniques"],
+["11","Hydrocarbons"],["11","Some Basic Principles of Organic Chemistry"],
+["12","Solutions"],["12","Electrochemistry"],["12","Chemical Kinetics"],["12","P-Block Elements"],
+["12","d- and f-Block Elements"],["12","Coordination Compounds"],["12","Haloalkanes and Haloarenes"],
+["12","Alcohols, Phenols and Ethers"],["12","Aldehydes, Ketones and Carboxylic Acids"],["12","Amines"],["12","Biomolecules"],["12","Principles Related to Practical Chemistry"]
+],
+Biology: [
+["11","Diversity in Living World"],["11","Structural Organisation in Animals and Plants"],["11","Cell Structure and Function"],
+["11","Plant Physiology"],["11","Human Physiology"],
+["12","Reproduction"],["12","Genetics and Evolution"],["12","Biology and Human Welfare"],
+["12","Biotechnology and Its Applications"],["12","Ecology and Environment"]
+]
+};
+
+const key = "neetTracker2026";
+let state = JSON.parse(localStorage.getItem(key) || "{}");
+const tracker = document.getElementById("tracker");
+
+function id(subject, idx){ return subject + "_" + idx; }
+function getProgress(subject, idx){
+  const a = state[id(subject,idx)] || [false,false,false,false,false];
+  return a.filter(Boolean).length;
+}
+function render(){
+  tracker.innerHTML="";
+  let num=0;
+  const q=document.getElementById("search").value.toLowerCase();
+  const sf=document.getElementById("subjectFilter").value;
+  const cf=document.getElementById("classFilter").value;
+
+  Object.entries(syllabus).forEach(([subject,items])=>{
+    if(sf!=="all" && sf!==subject) return;
+    items.forEach((item,idx)=>{
+      const [cls,name]=item;
+      if(cf!=="all" && cf!==cls) return;
+      if(q && !name.toLowerCase().includes(q) && !subject.toLowerCase().includes(q)) return;
+      num++;
+      const p=getProgress(subject,idx);
+      const tr=document.createElement("tr");
+      tr.dataset.subject=subject; tr.dataset.idx=idx;
+      tr.innerHTML=`
+        <td><span class="chapter-no">${num}</span>${name}<div class="tag">${subject} • Class ${cls}</div></td>
+        ${[0,1,2,3,4].map(i=>`<td><input class="check" type="checkbox" data-i="${i}" ${((state[id(subject,idx)]||[])[i]?"checked":"")}></td>`).join("")}
+        <td class="${p===5?'complete':p>0?'inprogress':''}">${p===5?'✓ Done':p+'/5'}</td>`;
+      tr.querySelectorAll(".check").forEach(box=>{
+        box.addEventListener("change",()=>{
+          const k=id(subject,idx);
+          if(!state[k]) state[k]=[false,false,false,false,false];
+          state[k][Number(box.dataset.i)]=box.checked;
+          localStorage.setItem(key,JSON.stringify(state));
+          render();
+        });
+      });
+      tracker.appendChild(tr);
+    });
+  });
+  updateSummary();
+}
+function stats(){
+  let totalTasks=0,doneTasks=0,totalUnits=0,doneUnits=0;
+  const subjectStats={Physics:[0,0],Chemistry:[0,0],Biology:[0,0]};
+  Object.entries(syllabus).forEach(([s,items])=>{
+    items.forEach((_,i)=>{
+      totalUnits++; totalTasks+=5;
+      const p=getProgress(s,i); doneTasks+=p;
+      if(p===5) doneUnits++;
+      subjectStats[s][0]+=5; subjectStats[s][1]+=p;
+    });
+  });
+  return {totalTasks,doneTasks,totalUnits,doneUnits,subjectStats};
+}
+function updateSummary(){
+  const x=stats(), pct=Math.round(x.doneTasks/x.totalTasks*100);
+  document.getElementById("overall").textContent=pct+"%";
+  document.getElementById("overallBar").style.width=pct+"%";
+  document.getElementById("doneCount").textContent=x.doneUnits+" / "+x.totalUnits;
+  document.getElementById("taskCount").textContent=x.doneTasks+" / "+x.totalTasks;
+  document.getElementById("status").textContent=pct===100?"COMPLETE":pct===0?"START":pct<50?"BUILDING":"STRONG";
+  [["Physics","physics"],["Chemistry","chem"],["Biology","bio"]].forEach(([s,c])=>{
+    const p=Math.round(x.subjectStats[s][1]/x.subjectStats[s][0]*100);
+    document.getElementById(c+"Pct").textContent=p+"%";
+    document.getElementById(c+"Bar").style.width=p+"%";
+  });
+}
+document.getElementById("search").addEventListener("input",render);
+document.getElementById("subjectFilter").addEventListener("change",render);
+document.getElementById("classFilter").addEventListener("change",render);
+
+function visibleRows(){
+  return [...tracker.querySelectorAll("tr")];
+}
+document.getElementById("markAll").onclick=()=>{
+  visibleRows().forEach(tr=>{
+    const s=tr.dataset.subject,i=Number(tr.dataset.idx);
+    state[id(s,i)]=[true,true,true,true,true];
+  });
+  localStorage.setItem(key,JSON.stringify(state)); render();
+};
+document.getElementById("clearAll").onclick=()=>{
+  visibleRows().forEach(tr=>{
+    const s=tr.dataset.subject,i=Number(tr.dataset.idx);
+    state[id(s,i)]=[false,false,false,false,false];
+  });
+  localStorage.setItem(key,JSON.stringify(state)); render();
+};
+document.getElementById("reset").onclick=()=>{
+  if(confirm("Reset all NEET tracker progress?")){
+    state={}; localStorage.removeItem(key); render();
+  }
+};
+render();
+</script>
+</body>
+</html>
